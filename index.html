@@ -1,0 +1,323 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row =>
+                    row.some(cell => cell !== '' && cell !== null && cell !== undefined)
+                );
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Mental Health Companion</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background-color: #f0f4f8;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, #4a90e2, #50c9c3);
+            color: white;
+            text-align: center;
+            padding: 3rem 1rem;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        header p {
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Navigation */
+        nav {
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #4a90e2;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: #50c9c3;
+        }
+
+        /* Main Content */
+        main {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        /* Chatbot Section */
+        .chatbot-section {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .chatbot-section h2 {
+            color: #4a90e2;
+            margin-bottom: 1rem;
+        }
+
+        .chat-window {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            height: 400px;
+            overflow-y: scroll;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background-color: #f9f9f9;
+        }
+
+        .chat-message {
+            margin-bottom: 1rem;
+            padding: 0.8rem;
+            border-radius: 8px;
+            max-width: 70%;
+        }
+
+        .user-message {
+            background-color: #4a90e2;
+            color: white;
+            margin-left: auto;
+        }
+
+        .bot-message {
+            background-color: #e0e0e0;
+            color: #333;
+        }
+
+        .chat-input {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 0.8rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .chat-input button {
+            padding: 0.8rem 1.5rem;
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .chat-input button:hover {
+            background-color: #50c9c3;
+        }
+
+        /* Features Section */
+        .features-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .feature-card {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .feature-card h3 {
+            color: #4a90e2;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Resources Section */
+        .resources-section {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+        }
+
+        .resources-section h2 {
+            color: #4a90e2;
+            margin-bottom: 1rem;
+        }
+
+        .resources-section ul {
+            list-style: none;
+        }
+
+        .resources-section li {
+            margin-bottom: 0.5rem;
+        }
+
+        .resources-section a {
+            color: #4a90e2;
+            text-decoration: none;
+        }
+
+        .resources-section a:hover {
+            text-decoration: underline;
+        }
+
+        /* Footer */
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 1rem;
+            margin-top: 2rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2rem;
+            }
+
+            nav ul {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .chat-window {
+                height: 300px;
+            }
+
+            .chat-input {
+                flex-direction: column;
+            }
+
+            .chat-input button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>AI Mental Health Companion</h1>
+        <p>Your empathetic, AI-powered companion for emotional support and mental well-being.</p>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="#home">Home</a></li>
+            <li><a href="#chat">Chat</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#resources">Resources</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section class="chatbot-section" id="chat">
+            <h2>Talk to Your Companion</h2>
+            <div class="chat-window">
+                <div class="chat-message bot-message">
+                    Hello! I'm here to listen and support you. How are you feeling today?
+                </div>
+                <div class="chat-message user-message">
+                    I'm feeling a bit stressed.
+                </div>
+                <div class="chat-message bot-message">
+                    I'm sorry to hear that. Would you like to try some relaxation techniques or talk about what's been stressing you?
+                </div>
+            </div>
+            <div class="chat-input">
+                <input type="text" placeholder="Type your message...">
+                <button>Send</button>
+            </div>
+        </section>
+
+        <section class="features-section" id="features">
+            <div class="feature-card">
+                <h3>Empathetic Responses</h3>
+                <p>Our AI uses NLP to understand and respond with empathy to your emotions.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Mood Tracking</h3>
+                <p>Monitor your emotional well-being over time with personalized insights.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Therapeutic Suggestions</h3>
+                <p>Receive guided exercises and coping strategies tailored to your needs.</p>
+            </div>
+        </section>
+
+        <section class="resources-section" id="resources">
+            <h2>Mental Health Resources</h2>
+            <ul>
+                <li><a href="#">National Alliance on Mental Illness (NAMI)</a></li>
+                <li><a href="#">Mental Health America</a></li>
+                <li><a href="#">Crisis Text Line</a></li>
+                <li><a href="#">Mindfulness and Meditation Guides</a></li>
+            </ul>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 AI Mental Health Companion. All rights reserved.</p>
+    </footer>
+</body>
+</html>
